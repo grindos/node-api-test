@@ -1,11 +1,39 @@
 var express     = require('express'),
     bodyParser  = require('body-parser'),
     morgan      = require('morgan'),
-    mongoose    = require('mongoose');
+    mongoose    = require('mongoose'),
+    bcrypt      = require('bcrypt-nodejs');
 
 
 var app = express(),
-    port = process.env.PORT || 8080;
+    port = process.env.PORT || 8080,
+    Schema = mongoose.Schema;
+
+var UserSchema = new Schema({
+    name: String,
+    username: { type: String, required: true, index: { unique: true }},
+    password: { type: String, required: true, select: false }
+});
+
+UserSchema.pre('save', function (next) {
+    var user = this;
+
+    if(!user.isModified('password')) return next();
+
+    bcrypt.hash(user.password, null, null, function(err, hash) {
+        if(err) return next(err);
+
+        user.password = hash;
+        next();
+    });
+});
+
+UserSchema.methods.comparePassword = function(password) {
+    var user = this;
+    return bcrypt.compareSync(password, user.password);
+}
+
+module.exports = mongoose.model('User', UserSchema);
 
 mongoose.connect('mongodb://admin:123456@ds147882.mlab.com:47882/grindos-test');
 
