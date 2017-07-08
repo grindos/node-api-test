@@ -1,49 +1,23 @@
 var express     = require('express'),
     bodyParser  = require('body-parser'),
     morgan      = require('morgan'),
-    mongoose    = require('mongoose'),
-    bcrypt      = require('bcrypt-nodejs');
+    mongoose    = require('mongoose');
+    User        = require('./app/models/user');
 
 
 var app = express(),
-    port = process.env.PORT || 8080,
-    Schema = mongoose.Schema;
+    port = process.env.PORT || 8080;
 
-var UserSchema = new Schema({
-    name: String,
-    username: { type: String, required: true, index: { unique: true }},
-    password: { type: String, required: true, select: false }
-});
-
-UserSchema.pre('save', function (next) {
-    var user = this;
-
-    if(!user.isModified('password')) return next();
-
-    bcrypt.hash(user.password, null, null, function(err, hash) {
-        if(err) return next(err);
-
-        user.password = hash;
-        next();
-    });
-});
-
-UserSchema.methods.comparePassword = function(password) {
-    var user = this;
-    return bcrypt.compareSync(password, user.password);
-}
-
-module.exports = mongoose.model('User', UserSchema);
-
-mongoose.connect('mongodb://admin:123456@ds147882.mlab.com:47882/grindos-test');
+mongoose.connect('mongodb://admin:123456@ds147882.mlab.com:47882/grindos-test', { useMongoClient: true });
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
+// Handle CORS requests
 app.use(function(req, res, next) {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST');
-    res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type, \Authorization');
+    res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type, \ Authorization');
     next();
 });
 
