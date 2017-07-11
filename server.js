@@ -78,15 +78,12 @@ apiRouter.route('/users/:user_id')
             if (err) res.send(err);
 
             if (req.body.name) {
-                console.log('Name was changed!');
                 user.name = req.body.name;
             }
             if (req.body.username) {
-                console.log('Username was changed!');
                 user.username = req.body.username;
             }
             if (req.body.password) {
-                console.log('Password was changed!');
                 user.password = req.body.password;
             }
 
